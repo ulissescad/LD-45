@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +20,7 @@ public class EnemyBehavior : MonoBehaviour
 
     private void MovObj()
     {
+        transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);
         transform.Translate(1 * dir, 0, 0);
         mov++;
         if (mov > 16 && !_isRespawnPoint)

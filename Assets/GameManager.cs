@@ -3,9 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
+using System.Threading.Tasks;
 
 public class GameManager : MonoBehaviour
 {
+
+    public enum Direction
+    {
+        Right,
+        Left,
+        Up,
+        Down
+    }
+
+    [SerializeField]
+    private float _movTime = 0.1f;
+
+    [SerializeField]
+    private int _revealTime=100;
+    [SerializeField]
+    private int _finalDelay=5000;
 
     [SerializeField]
     Animator _animBonus;
@@ -148,7 +166,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     Transform _mapRespawnPoint;
 
-
+    private Direction _direction = Direction.Right;
 
     private void Start()
     {
@@ -261,7 +279,7 @@ public class GameManager : MonoBehaviour
 
 
     // Start is called before the first frame update
-    IEnumerator Print()
+    private async void Print()
     {
 
 
@@ -290,7 +308,6 @@ public class GameManager : MonoBehaviour
             else {
                 child.GetComponent<Renderer>().material.color = new Color(0, 1, 0, 1);
                 child.name = "" + i;
-                Debug.Log(child.GetComponent<Renderer>().material.name);
             }
 
             var childCol = _gridColisor.GetComponent<Transform>().GetChild(i);
@@ -299,7 +316,7 @@ public class GameManager : MonoBehaviour
             var childFloor = _gridFloor.GetComponent<Transform>().GetChild(i);
             childFloor.GetComponent<Renderer>().enabled = false;
 
-            yield return new WaitForSeconds(0.01f);
+            await Task.Delay(_revealTime);
         }
 
         GameObject obj =_mapsPrefabs[totalMaps];
@@ -309,7 +326,7 @@ public class GameManager : MonoBehaviour
 
         _animEnding.SetTrigger("action");
 
-        yield return new WaitForSeconds(5f);
+        await Task.Delay(_finalDelay); ;
 
         if (totalMaps < _mapsPrefabs.Count)
         {
@@ -323,13 +340,10 @@ public class GameManager : MonoBehaviour
             _finalScore.text = "YOU SCORE IS: " + score;
         }
 
-
         DestroyV();
-        //StopCoroutine;
-        //return;
     }
 
-    IEnumerator Hide()
+    private async void Hide()
     {
         int count = _grid.GetComponent<Transform>().childCount;
         for (int i = 0; i < count; i++)
@@ -338,8 +352,9 @@ public class GameManager : MonoBehaviour
 
             child.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
             child.name = "" + i;
-           
-            yield return new WaitForSeconds(0.01f);
+
+            await Task.Delay(_revealTime);
+            //yield return new WaitForSeconds(0.01f);
         }
 
         _player.transform.position = _initialPosPlayer;
@@ -413,7 +428,7 @@ public class GameManager : MonoBehaviour
         }
 
         _totalGrey = grey;
-        StartCoroutine("Hide");
+        Hide();
     }
 
     private void Update()
@@ -421,246 +436,297 @@ public class GameManager : MonoBehaviour
 
         if (_totalGrey==0 && !isFinished)
         {
-             StartCoroutine("Print");
+            Print();
             isFinished = true;
             move = false;
         }
 
-            if (move)
+        if (!move)
         {
-            if (Input.GetKey(KeyCode.RightArrow)&&lastMov<Time.time)
-            {
-                lastMov = Time.time + 0.1f;
-                if ((int) _playerPos.y + 1 < 16)
-                {
-                    if (_gridRef[(int) _playerPos.x, (int) _playerPos.y + 1].GetComponent<Renderer>().material.name
-                        == "Floor (Instance)")
-                    {
-                        _floorRef[(int) _playerPos.x, (int) _playerPos.y + 1].GetComponent<Renderer>().material.color =
-                            _charColor;
-
-                        _player.transform.position += new Vector3(1, 0, 0);
-
-                        if (_gridChange[(int) _playerPos.x, (int) _playerPos.y + 1] == false)
-                        {
-                            _totalGrey--;
-                            _gridChange[(int) _playerPos.x, (int) _playerPos.y + 1] = true;
-                            score++;
-                            _scoreText.text = " " + score;
-                        }
-
-                        _playerPos.y += 1;
-
-                        if ((int)_playerPos.y + 1<16&&_gridRef[(int) _playerPos.x, (int) _playerPos.y + 1].GetComponent<Renderer>().material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x, (int) _playerPos.y + 1].GetComponent<Renderer>().enabled = true;
-
-                        if ((int)_playerPos.y - 1>-1&&_gridRef[(int) _playerPos.x, (int) _playerPos.y - 1].GetComponent<Renderer>().material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x, (int) _playerPos.y - 1].GetComponent<Renderer>().enabled = true;
-
-                        if ((int)_playerPos.x - 1>-1&&_gridRef[(int) _playerPos.x - 1, (int) _playerPos.y].GetComponent<Renderer>().material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x - 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-
-                        if ((int)_playerPos.x + 1<16&&_gridRef[(int) _playerPos.x + 1, (int) _playerPos.y].GetComponent<Renderer>().material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x + 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-
-                        _sourcePlayer.PlayOneShot(_movPlayer);
-
-                    }
-                    else
-                    {
-                        _colRef[(int) _playerPos.x, (int) _playerPos.y + 1].GetComponent<Renderer>().enabled = true;
-                    }
-                }
-
-            }
-
-            if (Input.GetKey(KeyCode.LeftArrow) && lastMov < Time.time)
-            {
-                lastMov = Time.time + 0.1f;
-                if ((int) _playerPos.y - 1 > -1)
-                {
-                    if (_gridRef[(int) _playerPos.x, (int) _playerPos.y - 1].GetComponent<Renderer>().material.name
-                        == "Floor (Instance)")
-                    {
-                        _floorRef[(int) _playerPos.x, (int) _playerPos.y - 1].GetComponent<Renderer>().material.color =
-                            _charColor;
-
-                        _player.transform.position += new Vector3(-1, 0, 0);
-
-                        if (_gridChange[(int) _playerPos.x, (int) _playerPos.y - 1] == false)
-                        {
-                            _totalGrey--;
-                            _gridChange[(int) _playerPos.x, (int) _playerPos.y - 1] = true;
-                            score++;
-                            _scoreText.text = " " + score;
-                        }
-
-                        _playerPos.y -= 1;
-
-                        if ((int) _playerPos.y + 1 < 16
-                            && _gridRef[(int) _playerPos.x, (int) _playerPos.y + 1]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x, (int) _playerPos.y + 1].GetComponent<Renderer>().enabled = true;
-
-                        if ((int) _playerPos.y - 1 > -1
-                            && _gridRef[(int) _playerPos.x, (int) _playerPos.y - 1]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x, (int) _playerPos.y - 1].GetComponent<Renderer>().enabled = true;
-
-                        if ((int) _playerPos.x - 1 > -1
-                            && _gridRef[(int) _playerPos.x - 1, (int) _playerPos.y]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x - 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-
-                        if ((int) _playerPos.x + 1 < 16
-                            && _gridRef[(int) _playerPos.x + 1, (int) _playerPos.y]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x + 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-
-                        _sourcePlayer.PlayOneShot(_movPlayer);
-
-                    }
-                    else
-                    {
-                        _colRef[(int) _playerPos.x, (int) _playerPos.y - 1].GetComponent<Renderer>().enabled = true;
-                    }
-                }
-            }
-
-            if (Input.GetKey(KeyCode.UpArrow) && lastMov < Time.time)
-            {
-                lastMov = Time.time + 0.1f;
-                if ((int) _playerPos.x - 1 > -1)
-                {
-                    if (_gridRef[(int) _playerPos.x - 1, (int) _playerPos.y].GetComponent<Renderer>().material.name
-                        == "Floor (Instance)")
-                    {
-                        _floorRef[(int) _playerPos.x - 1, (int) _playerPos.y].GetComponent<Renderer>().material.color =
-                            _charColor;
-
-                        _player.transform.position += new Vector3(0, 0, 1);
-
-                        if (_gridChange[(int) _playerPos.x - 1, (int) _playerPos.y] == false)
-                        {
-                            _totalGrey--;
-                            _gridChange[(int) _playerPos.x - 1, (int) _playerPos.y] = true;
-                            score++;
-                            _scoreText.text = " " + score;
-                        }
-
-                        _playerPos.x -= 1;
-
-                        if ((int) _playerPos.y + 1 < 16
-                            && _gridRef[(int) _playerPos.x, (int) _playerPos.y + 1]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x, (int) _playerPos.y + 1].GetComponent<Renderer>().enabled = true;
-
-                        if ((int) _playerPos.y - 1 > -1
-                            && _gridRef[(int) _playerPos.x, (int) _playerPos.y - 1]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x, (int) _playerPos.y - 1].GetComponent<Renderer>().enabled = true;
-
-                        if ((int) _playerPos.x - 1 > -1
-                            && _gridRef[(int) _playerPos.x - 1, (int) _playerPos.y]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x - 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-
-                        if ((int) _playerPos.x + 1 < 16
-                            && _gridRef[(int) _playerPos.x + 1, (int) _playerPos.y]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x + 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-
-                        _sourcePlayer.PlayOneShot(_movPlayer);
-                    }
-                    else
-                    {
-                        _colRef[(int) _playerPos.x - 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-                    }
-                }
-            }
-
-            if (Input.GetKey(KeyCode.DownArrow) && lastMov < Time.time)
-            {
-                lastMov = Time.time + 0.1f;
-                if ((int) _playerPos.x + 1 < 16)
-                {
-                    if (_gridRef[(int) _playerPos.x + 1, (int) _playerPos.y].GetComponent<Renderer>().material.name
-                        == "Floor (Instance)")
-                    {
-                        _floorRef[(int) _playerPos.x + 1, (int) _playerPos.y].GetComponent<Renderer>().material.color =
-                            _charColor;
-
-                        _player.transform.position += new Vector3(0, 0, -1);
-
-                        if (_gridChange[(int) _playerPos.x + 1, (int) _playerPos.y] == false)
-                        {
-                            _totalGrey--;
-                            _gridChange[(int) _playerPos.x + 1, (int) _playerPos.y] = true;
-                            score++;
-                            _scoreText.text = " " + score;
-                        }
-
-                        _playerPos.x += 1;
-
-                        if ((int) _playerPos.y + 1 < 16
-                            && _gridRef[(int) _playerPos.x, (int) _playerPos.y + 1]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x, (int) _playerPos.y + 1].GetComponent<Renderer>().enabled = true;
-
-                        if ((int) _playerPos.y - 1 > -1
-                            && _gridRef[(int) _playerPos.x, (int) _playerPos.y - 1]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x, (int) _playerPos.y - 1].GetComponent<Renderer>().enabled = true;
-
-                        if ((int) _playerPos.x - 1 > -1
-                            && _gridRef[(int) _playerPos.x - 1, (int) _playerPos.y]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x - 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-
-                        if ((int) _playerPos.x + 1 < 16
-                            && _gridRef[(int) _playerPos.x + 1, (int) _playerPos.y]
-                                .GetComponent<Renderer>()
-                                .material.name
-                            == "OBS (Instance)")
-                            _colRef[(int) _playerPos.x + 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-
-                        _sourcePlayer.PlayOneShot(_movPlayer);
-
-                    }
-                    else
-                    {
-                        _colRef[(int) _playerPos.x + 1, (int) _playerPos.y].GetComponent<Renderer>().enabled = true;
-                    }
-                }
-            }
+            return;
         }
 
+        if (SwipeManager.swipeRight)
+            _direction = Direction.Right;
+        if (SwipeManager.swipeLeft)
+            _direction = Direction.Left;
+        if (SwipeManager.swipeUp)
+            _direction = Direction.Up;
+        if (SwipeManager.swipeDown)
+            _direction = Direction.Down;
+
+        switch (_direction)
+        {
+            case Direction.Right:    
+                if (lastMov < Time.time)
+                {
+                    _player.transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);
+                    lastMov = Time.time + _movTime;
+                    if ((int)_playerPos.y + 1 < 16)
+                    {
+                        if (_gridRef[(int)_playerPos.x, (int)_playerPos.y + 1].GetComponent<Renderer>().material.name
+                            == "Floor (Instance)")
+                        {
+                            _floorRef[(int)_playerPos.x, (int)_playerPos.y + 1].GetComponent<Renderer>().material.color =
+                                _charColor;
+
+                            _player.transform.position += new Vector3(1, 0, 0);
+
+                            if (_gridChange[(int)_playerPos.x, (int)_playerPos.y + 1] == false)
+                            {
+                                _totalGrey--;
+                                _gridChange[(int)_playerPos.x, (int)_playerPos.y + 1] = true;
+                                score++;
+                                _scoreText.text = " " + score;
+                            }
+
+                            _playerPos.y += 1;
+
+                            if ((int)_playerPos.y + 1 < 16 && _gridRef[(int)_playerPos.x, (int)_playerPos.y + 1].GetComponent<Renderer>().material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x, (int)_playerPos.y + 1].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.y - 1 > -1 && _gridRef[(int)_playerPos.x, (int)_playerPos.y - 1].GetComponent<Renderer>().material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x, (int)_playerPos.y - 1].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.x - 1 > -1 && _gridRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.x + 1 < 16 && _gridRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+
+                            _sourcePlayer.PlayOneShot(_movPlayer);
+
+                        }
+                        else
+                        {
+                            SwipeManager.swipeRight = false;
+                            SwipeManager.swipeLeft = true;
+                            _direction = Direction.Left;
+
+                            _colRef[(int)_playerPos.x, (int)_playerPos.y + 1].GetComponent<Renderer>().enabled = true;
+                        }
+                    }
+
+                }
+                break;
+            case Direction.Left:
+                if (lastMov < Time.time)
+                {
+                    _player.transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);
+                    lastMov = Time.time + _movTime;
+                    if ((int)_playerPos.y - 1 > -1)
+                    {
+                        if (_gridRef[(int)_playerPos.x, (int)_playerPos.y - 1].GetComponent<Renderer>().material.name
+                            == "Floor (Instance)")
+                        {
+                            _floorRef[(int)_playerPos.x, (int)_playerPos.y - 1].GetComponent<Renderer>().material.color =
+                                _charColor;
+
+                            _player.transform.position += new Vector3(-1, 0, 0);
+
+                            if (_gridChange[(int)_playerPos.x, (int)_playerPos.y - 1] == false)
+                            {
+                                _totalGrey--;
+                                _gridChange[(int)_playerPos.x, (int)_playerPos.y - 1] = true;
+                                score++;
+                                _scoreText.text = " " + score;
+                            }
+
+                            _playerPos.y -= 1;
+
+                            if ((int)_playerPos.y + 1 < 16
+                                && _gridRef[(int)_playerPos.x, (int)_playerPos.y + 1]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x, (int)_playerPos.y + 1].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.y - 1 > -1
+                                && _gridRef[(int)_playerPos.x, (int)_playerPos.y - 1]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x, (int)_playerPos.y - 1].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.x - 1 > -1
+                                && _gridRef[(int)_playerPos.x - 1, (int)_playerPos.y]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.x + 1 < 16
+                                && _gridRef[(int)_playerPos.x + 1, (int)_playerPos.y]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+
+                            _sourcePlayer.PlayOneShot(_movPlayer);
+
+                        }
+                        else
+                        {
+                            SwipeManager.swipeRight = true;
+                            SwipeManager.swipeLeft = false;
+                            _direction = Direction.Right;
+                            _colRef[(int)_playerPos.x, (int)_playerPos.y - 1].GetComponent<Renderer>().enabled = true;
+                        }
+                    }
+                }
+                break;
+            case Direction.Up:
+                if (lastMov < Time.time)
+                {
+                    _player.transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);
+                    lastMov = Time.time + _movTime;
+                    if ((int)_playerPos.x - 1 > -1)
+                    {
+                        if (_gridRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().material.name
+                            == "Floor (Instance)")
+                        {
+                            _floorRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().material.color =
+                                _charColor;
+
+                            _player.transform.position += new Vector3(0, 0, 1);
+
+                            if (_gridChange[(int)_playerPos.x - 1, (int)_playerPos.y] == false)
+                            {
+                                _totalGrey--;
+                                _gridChange[(int)_playerPos.x - 1, (int)_playerPos.y] = true;
+                                score++;
+                                _scoreText.text = " " + score;
+                            }
+
+                            _playerPos.x -= 1;
+
+                            if ((int)_playerPos.y + 1 < 16
+                                && _gridRef[(int)_playerPos.x, (int)_playerPos.y + 1]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x, (int)_playerPos.y + 1].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.y - 1 > -1
+                                && _gridRef[(int)_playerPos.x, (int)_playerPos.y - 1]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x, (int)_playerPos.y - 1].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.x - 1 > -1
+                                && _gridRef[(int)_playerPos.x - 1, (int)_playerPos.y]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.x + 1 < 16
+                                && _gridRef[(int)_playerPos.x + 1, (int)_playerPos.y]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+
+                            _sourcePlayer.PlayOneShot(_movPlayer);
+                        }
+                        else
+                        {
+                            SwipeManager.swipeUp = false;
+                            SwipeManager.swipeDown = true;
+                            _direction = Direction.Down;
+
+                            _colRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+                        }
+                    }
+                    else
+                    {
+                        SwipeManager.swipeUp = false;
+                        SwipeManager.swipeDown = true;
+                        _direction = Direction.Down;
+                    }
+                }
+                break;
+            case Direction.Down:
+                if (lastMov < Time.time)
+                {
+                    _player.transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);
+                    lastMov = Time.time + _movTime;
+                    if ((int)_playerPos.x + 1 < 16)
+                    {
+                        if (_gridRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().material.name
+                            == "Floor (Instance)")
+                        {
+                            _floorRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().material.color =
+                                _charColor;
+
+                            _player.transform.position += new Vector3(0, 0, -1);
+
+                            if (_gridChange[(int)_playerPos.x + 1, (int)_playerPos.y] == false)
+                            {
+                                _totalGrey--;
+                                _gridChange[(int)_playerPos.x + 1, (int)_playerPos.y] = true;
+                                score++;
+                                _scoreText.text = " " + score;
+                            }
+
+                            _playerPos.x += 1;
+
+                            if ((int)_playerPos.y + 1 < 16
+                                && _gridRef[(int)_playerPos.x, (int)_playerPos.y + 1]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x, (int)_playerPos.y + 1].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.y - 1 > -1
+                                && _gridRef[(int)_playerPos.x, (int)_playerPos.y - 1]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x, (int)_playerPos.y - 1].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.x - 1 > -1
+                                && _gridRef[(int)_playerPos.x - 1, (int)_playerPos.y]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+
+                            if ((int)_playerPos.x + 1 < 16
+                                && _gridRef[(int)_playerPos.x + 1, (int)_playerPos.y]
+                                    .GetComponent<Renderer>()
+                                    .material.name
+                                == "OBS (Instance)")
+                                _colRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+
+                            _sourcePlayer.PlayOneShot(_movPlayer);
+
+                        }
+                        else
+                        {
+                            SwipeManager.swipeUp = true;
+                            SwipeManager.swipeDown = false;
+                            _direction = Direction.Up;
+                            _colRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
+                        }
+                    }
+                    else
+                    {
+                        SwipeManager.swipeUp = true;
+                        SwipeManager.swipeDown = false;
+                        _direction = Direction.Up;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        
         if (Input.GetKey(KeyCode.Escape))
         {
             _optionScreen.SetActive(true);
