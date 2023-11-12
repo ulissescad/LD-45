@@ -4674,7 +4674,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60fb35b00f917124eb9948df85394295, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _movTime: 0.2
+  _playerPos: {x: 6, y: 8}
+  _initialPosPlayer: {x: 0.49, y: -0.216, z: 0.4761}
+  _movTime: 0.3
+  _dashTime: 1
   _revealTime: 10
   _finalDelay: 5000
   _animBonus: {fileID: 1464320022}
@@ -4717,8 +4720,6 @@ MonoBehaviour:
     type: 3}
   _player: {fileID: 185037651}
   _scoreText: {fileID: 1889744157}
-  _playerPos: {x: 6, y: 8}
-  _initialPosPlayer: {x: 0.49, y: -0.216, z: 0.4761}
   _totalGrey: 1
   _actualGrey: 0
   _mapsPrefabs:
@@ -7107,7 +7108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sharedProfile: {fileID: 11400000, guid: 7ae896470e3701b48b55556fb794ce38, type: 2}
-  isGlobal: 0
+  isGlobal: 1
   blendDistance: 0
   weight: 1
   priority: 0

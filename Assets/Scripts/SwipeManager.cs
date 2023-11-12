@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SwipeManager : MonoBehaviour
 {
-    public static bool tap, swipeLeft, swipeRight, swipeUp, swipeDown;
+    public static bool tap, swipeLeft, swipeRight, swipeUp, swipeDown,neutral;
     private bool isDraging = false;
     private Vector2 startTouch, swipeDelta;
 
@@ -51,7 +51,7 @@ public class SwipeManager : MonoBehaviour
         }
 
         //Did we cross the distance?
-        if (swipeDelta.magnitude > 100)
+        if (swipeDelta.magnitude > 50)
         {
             //Which direction?
             float x = swipeDelta.x;
@@ -74,6 +74,7 @@ public class SwipeManager : MonoBehaviour
             }
 
             Reset();
+            neutral = false;
         }
 
     }
@@ -82,5 +83,11 @@ public class SwipeManager : MonoBehaviour
     {
         startTouch = swipeDelta = Vector2.zero;
         isDraging = false;
+    }
+
+    public static void Neutral()
+    {
+        neutral = true;
+        swipeLeft = swipeRight = swipeUp = swipeDown = false;
     }
 }

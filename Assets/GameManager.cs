@@ -9,6 +9,12 @@ using System.Threading.Tasks;
 public class GameManager : MonoBehaviour
 {
 
+    public static GameManager SINGLETON;
+
+    public Vector2 _playerPos = new Vector2(7, 8);
+
+    public Vector3 _initialPosPlayer;
+
     public enum Direction
     {
         Right,
@@ -22,6 +28,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private int _revealTime=100;
+
     [SerializeField]
     private int _finalDelay=5000;
 
@@ -37,10 +44,6 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     GameObject _prefabBonus;
 
-    //[SerializeField]
-    //GameObject _startScreen;
-    public static GameManager SINGLETON;
-
     [SerializeField]
     GameObject[] _respawnEnemyPoint = new GameObject[4];
 
@@ -49,11 +52,6 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     int _maxEnemies = 10;
-
-    Color _charColor;
-    Color _OBSColor;
-
-    float lastMov;
 
     [SerializeField]
     AudioClip[] _inGame = new AudioClip[3];
@@ -124,41 +122,14 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     TMP_Text _scoreText;
 
-    int score = 0;
-    int bonus = 0;
-    int lastPointResapwn;
-
-    public Vector2 _playerPos = new Vector2(7,8);
-
-    public Vector3 _initialPosPlayer;
-
-    Transform[,] _gridRef = new Transform[16, 16];
-
-    Transform[,] _colRef = new Transform[16, 16];
-
-    Transform[,] _floorRef = new Transform[16, 16];
-
-    Transform[,] _bonusRef = new Transform[5, 5];
-
-    bool[,] _gridBonusBool = new bool[5, 5];
-
-    bool[,] _gridChange = new bool[16, 16];
-
     [SerializeField]
-    int _totalGrey =1;
+    int _totalGrey = 1;
 
     [SerializeField]
     int _actualGrey = 0;
 
-    bool isFinished = false;
-    bool move = false;
-
-    List<Transform> Destroy = new List<Transform>();
-
     [SerializeField]
     List<GameObject> _mapsPrefabs = new List<GameObject>();
-
-    int totalMaps = 0;
 
     [SerializeField]
     Image _bgImage;
@@ -166,6 +137,28 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     Transform _mapRespawnPoint;
 
+    private Color _charColor;
+    private Color _OBSColor;
+
+    private float lastMov;
+    private float _dashMovSpeed;
+
+    private int score = 0;
+    private int bonus = 0;
+    private int lastPointResapwn;
+
+    private Transform[,] _gridRef = new Transform[16, 16];
+    private Transform[,] _colRef = new Transform[16, 16];
+    private Transform[,] _floorRef = new Transform[16, 16];
+    private Transform[,] _bonusRef = new Transform[5, 5];
+
+    private bool[,] _gridBonusBool = new bool[5, 5];
+    private bool[,] _gridChange = new bool[16, 16];
+
+    private List<Transform> Destroy = new List<Transform>();
+    private bool isFinished = false;
+    private bool move = false;
+    private int totalMaps = 0;
     private Direction _direction = Direction.Right;
 
     private void Start()
@@ -203,6 +196,7 @@ public class GameManager : MonoBehaviour
         InvokeRepeating("RespawnEnemy", 1, 4);
 
     }
+
     private void Initialize()
     {
 
@@ -224,6 +218,8 @@ public class GameManager : MonoBehaviour
 
         isFinished = false;
         _totalGrey = 1;
+
+        _dashMovSpeed = _movTime / 3f;
 
         Invoke("MountRefGrid", 1);
     }
@@ -277,8 +273,6 @@ public class GameManager : MonoBehaviour
         Invoke("MountRefGrid", 1);
     }
 
-
-    // Start is called before the first frame update
     private async void Print()
     {
 
@@ -365,7 +359,6 @@ public class GameManager : MonoBehaviour
         StopAllCoroutines();
     }
 
-    // Update is called once per frame
     void DestroyV()
     {
         for (int i = 0; i < 16; i++)
