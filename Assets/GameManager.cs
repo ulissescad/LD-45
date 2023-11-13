@@ -445,62 +445,57 @@ public class GameManager : MonoBehaviour
 
         if (SwipeManager.swipeRight)
         {
-            //if (_lastDirection == _direction && !_dashing)
-            //{
-            //    _dashing = true;
-            //    _movTime /= 3;
-            //    Invoke("ResetSpeed", 0.5f);
-            //}
-            //else
-            //{
-            //_lastDirection = Direction.Right;
             _direction = Direction.Right;
-            //}
+            if (_lastDirection==_direction&&!_dashing)
+            {
+                _dashing = true;
+                _movTime /= 3;
+                Invoke("ResetSpeed", 0.5f);
+            }
+
+            _lastDirection = Direction.Right;
+
         }
 
         if (SwipeManager.swipeLeft)
         {
-            //if (_lastDirection == _direction && !_dashing)
-            //{
-            //    _dashing = true;
-            //    _movTime /= 3;
-            //    Invoke("ResetSpeed", 0.5f);
-            //}
-            //else
-            //{
-            //_lastDirection = Direction.Left;
             _direction = Direction.Left;
-            //}
+            if (_lastDirection == _direction && !_dashing)
+            {
+                _dashing = true;
+                _movTime /= 3;
+                Invoke("ResetSpeed", 0.5f);
+            }
+
+            _lastDirection = Direction.Left;
+
         }
 
         if (SwipeManager.swipeUp)
         {
-            //if (_lastDirection == _direction && !_dashing)
-            //{
-            //    _dashing = true;
-            //    _movTime /= 3;
-            //    Invoke("ResetSpeed", 0.5f);
-            //}
-            //else
-            //{
-            //_lastDirection = Direction.Up;
             _direction = Direction.Up;
-            //}
-            //
+            if (_lastDirection == _direction && !_dashing)
+            {
+                _dashing = true;
+                _movTime /= 3;
+                Invoke("ResetSpeed", 0.5f);
+            }
+
+            _lastDirection = Direction.Up;
+
         }
                 
         if (SwipeManager.swipeDown)
         {
-            //if (_lastDirection == _direction && !_dashing)
-            //{
-            //    _dashing = true;
-            //    _movTime /= 3;
-            //    Invoke("ResetSpeed", 0.5f);
-            //}
-            //else
-            //{
             _direction = Direction.Down;
-            //}
+            if (_lastDirection == _direction && !_dashing)
+            {
+                _dashing = true;
+                _movTime /= 3;
+                Invoke("ResetSpeed", 0.5f);
+            }
+
+            _lastDirection = Direction.Down;
 
         }
         
@@ -691,6 +686,7 @@ public class GameManager : MonoBehaviour
                             //SwipeManager.swipeUp = false;
                             //SwipeManager.swipeDown = true;
                             _direction = Direction.Down;
+                            _lastDirection = Direction.Down;
 
                             _colRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
                         }
@@ -765,6 +761,7 @@ public class GameManager : MonoBehaviour
                             //SwipeManager.swipeUp = true;
                            // SwipeManager.swipeDown = false;
                             _direction = Direction.Up;
+                            _lastDirection = Direction.Up;
 
                             _colRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
                         }
