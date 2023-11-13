@@ -20,7 +20,8 @@ public class GameManager : MonoBehaviour
         Right,
         Left,
         Up,
-        Down
+        Down,
+        None
     }
 
     [SerializeField]
@@ -161,6 +162,9 @@ public class GameManager : MonoBehaviour
     private int totalMaps = 0;
     private Direction _direction = Direction.Right;
 
+    private Direction _lastDirection = Direction.Right;
+    private List<Direction> _directions = new List<Direction>();
+    private bool _dashing;
     private void Start()
     {
 
@@ -193,7 +197,7 @@ public class GameManager : MonoBehaviour
 
         lastMov = Time.time;
 
-        InvokeRepeating("RespawnEnemy", 1, 4);
+        //InvokeRepeating("RespawnEnemy", 1, 4);
 
     }
 
@@ -440,13 +444,66 @@ public class GameManager : MonoBehaviour
         }
 
         if (SwipeManager.swipeRight)
+        {
+            //if (_lastDirection == _direction && !_dashing)
+            //{
+            //    _dashing = true;
+            //    _movTime /= 3;
+            //    Invoke("ResetSpeed", 0.5f);
+            //}
+            //else
+            //{
+            //_lastDirection = Direction.Right;
             _direction = Direction.Right;
+            //}
+        }
+
         if (SwipeManager.swipeLeft)
+        {
+            //if (_lastDirection == _direction && !_dashing)
+            //{
+            //    _dashing = true;
+            //    _movTime /= 3;
+            //    Invoke("ResetSpeed", 0.5f);
+            //}
+            //else
+            //{
+            //_lastDirection = Direction.Left;
             _direction = Direction.Left;
+            //}
+        }
+
         if (SwipeManager.swipeUp)
+        {
+            //if (_lastDirection == _direction && !_dashing)
+            //{
+            //    _dashing = true;
+            //    _movTime /= 3;
+            //    Invoke("ResetSpeed", 0.5f);
+            //}
+            //else
+            //{
+            //_lastDirection = Direction.Up;
             _direction = Direction.Up;
+            //}
+            //
+        }
+                
         if (SwipeManager.swipeDown)
+        {
+            //if (_lastDirection == _direction && !_dashing)
+            //{
+            //    _dashing = true;
+            //    _movTime /= 3;
+            //    Invoke("ResetSpeed", 0.5f);
+            //}
+            //else
+            //{
             _direction = Direction.Down;
+            //}
+
+        }
+        
 
         switch (_direction)
         {
@@ -496,9 +553,10 @@ public class GameManager : MonoBehaviour
                         }
                         else
                         {
-                            SwipeManager.swipeRight = false;
-                            SwipeManager.swipeLeft = true;
+                            //SwipeManager.swipeRight = false;
+                            //SwipeManager.swipeLeft = true;
                             _direction = Direction.Left;
+                            _lastDirection = Direction.Left;
 
                             _colRef[(int)_playerPos.x, (int)_playerPos.y + 1].GetComponent<Renderer>().enabled = true;
                         }
@@ -564,9 +622,10 @@ public class GameManager : MonoBehaviour
                         }
                         else
                         {
-                            SwipeManager.swipeRight = true;
-                            SwipeManager.swipeLeft = false;
+                            //SwipeManager.swipeRight = true;
+                            //SwipeManager.swipeLeft = false;
                             _direction = Direction.Right;
+                            _lastDirection = Direction.Right;
                             _colRef[(int)_playerPos.x, (int)_playerPos.y - 1].GetComponent<Renderer>().enabled = true;
                         }
                     }
@@ -629,8 +688,8 @@ public class GameManager : MonoBehaviour
                         }
                         else
                         {
-                            SwipeManager.swipeUp = false;
-                            SwipeManager.swipeDown = true;
+                            //SwipeManager.swipeUp = false;
+                            //SwipeManager.swipeDown = true;
                             _direction = Direction.Down;
 
                             _colRef[(int)_playerPos.x - 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
@@ -638,9 +697,10 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        SwipeManager.swipeUp = false;
-                        SwipeManager.swipeDown = true;
+                        //SwipeManager.swipeUp = false;
+                        //SwipeManager.swipeDown = true;
                         _direction = Direction.Down;
+                        _lastDirection = Direction.Down;
                     }
                 }
                 break;
@@ -702,17 +762,19 @@ public class GameManager : MonoBehaviour
                         }
                         else
                         {
-                            SwipeManager.swipeUp = true;
-                            SwipeManager.swipeDown = false;
+                            //SwipeManager.swipeUp = true;
+                           // SwipeManager.swipeDown = false;
                             _direction = Direction.Up;
+
                             _colRef[(int)_playerPos.x + 1, (int)_playerPos.y].GetComponent<Renderer>().enabled = true;
                         }
                     }
                     else
                     {
-                        SwipeManager.swipeUp = true;
-                        SwipeManager.swipeDown = false;
+                       // SwipeManager.swipeUp = true;
+                       // SwipeManager.swipeDown = false;
                         _direction = Direction.Up;
+                        _lastDirection = Direction.Up;
                     }
                 }
                 break;
@@ -726,6 +788,12 @@ public class GameManager : MonoBehaviour
             _player.SetActive(false);
             move = false;
         }
+    }
+
+    private void ResetSpeed()
+    {
+        _movTime *= 3;
+        _dashing = false;
     }
 
     public void Bonus()

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SwipeManager : MonoBehaviour
 {
-    public static bool tap, swipeLeft, swipeRight, swipeUp, swipeDown,neutral;
+    public static bool tap, swipeLeft, swipeRight, swipeUp, swipeDown;
     private bool isDraging = false;
     private Vector2 startTouch, swipeDelta;
 
@@ -74,7 +74,6 @@ public class SwipeManager : MonoBehaviour
             }
 
             Reset();
-            neutral = false;
         }
 
     }
@@ -85,9 +84,4 @@ public class SwipeManager : MonoBehaviour
         isDraging = false;
     }
 
-    public static void Neutral()
-    {
-        neutral = true;
-        swipeLeft = swipeRight = swipeUp = swipeDown = false;
-    }
 }
