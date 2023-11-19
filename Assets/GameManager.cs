@@ -499,7 +499,6 @@ public class GameManager : MonoBehaviour
 
         }
         
-
         switch (_direction)
         {
             case Direction.Right:    
