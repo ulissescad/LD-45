@@ -40,6 +40,7 @@ public class ScrollController : MonoBehaviour, IEndDragHandler
             {
                 dist = Math.Abs((1f / (_amountItems - 1) * i) - clamped);
                 result = (fraction * i);
+                GameManager.SINGLETON.TotalMaps = i;
             }
                 
         }

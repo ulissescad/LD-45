@@ -8,6 +8,17 @@ using System.Threading.Tasks;
 
 public class GameManager : MonoBehaviour
 {
+    public int TotalMaps 
+    {
+        get 
+        {
+            return totalMaps;
+        }
+        set
+        {
+            totalMaps = value;
+        }
+    }
 
     public static GameManager SINGLETON;
 
@@ -82,6 +93,9 @@ public class GameManager : MonoBehaviour
     Button _startButton;
 
     [SerializeField]
+    Button _pauseButton;
+
+    [SerializeField]
     Button _restartButton;
 
     [SerializeField]
@@ -89,6 +103,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     GameObject _startScreen;
+
+    [SerializeField]
+    GameObject _UIScreen;
 
     [SerializeField]
     GameObject _restartScreen;
@@ -132,6 +149,10 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     List<GameObject> _mapsPrefabs = new List<GameObject>();
 
+    [SerializeField] private UIMapSelection _UiMapSelectionPF;
+
+    [SerializeField] private Transform _UIMapSelectionRoot;
+
     [SerializeField]
     Image _bgImage;
 
@@ -168,6 +189,12 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
 
+        for (int i = 0; i < _mapsPrefabs.Count; i++)
+        {
+            var mapUI = Instantiate(_UiMapSelectionPF, _UIMapSelectionRoot);
+            mapUI.SetImage(_mapsPrefabs[i].GetComponent<MapConfig>()._character);
+        }
+
         GameObject obj = Instantiate(_gridBonus, this.transform);
 
         int count = 0;
@@ -190,15 +217,23 @@ public class GameManager : MonoBehaviour
 
         SINGLETON = this;
 
-        _startButton.onClick.AddListener(Restart);
+        _startButton.onClick.AddListener(StartGame);
+        _pauseButton.onClick.AddListener(Pause);
         _finalButton.onClick.AddListener(Restart);
         _restartButton.onClick.AddListener(Restart);
 
 
         lastMov = Time.time;
 
-        //InvokeRepeating("RespawnEnemy", 1, 4);
+        InvokeRepeating("RespawnEnemy", 1, 4);
 
+    }
+
+    private void Pause()
+    {
+        _optionScreen.SetActive(true);
+        _player.SetActive(false);
+        move = false;
     }
 
     private void Initialize()
@@ -211,6 +246,7 @@ public class GameManager : MonoBehaviour
         Camera.main.GetComponent<AudioSource>().Play();
 
         _startScreen.SetActive(false);
+        _UIScreen.SetActive(true);
 
          GameObject obj =  Instantiate(_mapsPrefabs[totalMaps], _mapRespawnPoint);
         _grid = obj.GetComponent<MapConfig>()._grid;
@@ -254,11 +290,61 @@ public class GameManager : MonoBehaviour
             Destroy(child.gameObject);
         }
         _startScreen.SetActive(false);
+        _UIScreen.SetActive(true);
         _finalScreen.SetActive(false);
         _restartScreen.SetActive(false);
         _optionScreen.SetActive(false);
 
         totalMaps = 0;
+        score = 0;
+        _scoreText.text = " " + score;
+        bonus = 0;
+
+        GameObject obj = Instantiate(_mapsPrefabs[totalMaps], _mapRespawnPoint);
+        _grid = obj.GetComponent<MapConfig>()._grid;
+        _gridColisor = obj.GetComponent<MapConfig>()._gridOBS;
+        _gridFloor = obj.GetComponent<MapConfig>()._gridFloor;
+        _bgImage.sprite = obj.GetComponent<MapConfig>()._character.sprite;
+        _charColor = obj.GetComponent<MapConfig>()._charColor;
+        _OBSColor = obj.GetComponent<MapConfig>()._OBSColor;
+
+        isFinished = false;
+        _totalGrey = 1;
+
+        Invoke("MountRefGrid", 1);
+    }
+
+    private void StartGame()
+    {
+
+        foreach (var item in _enemylist)
+        {
+            GameObject en = item;
+            Destroy(en);
+        }
+
+        _enemylist.Clear();
+        _maxEnemies = 10;
+
+        int audio = Random.RandomRange(0, 3);
+
+        Camera.main.GetComponent<AudioSource>().clip = _inGame[audio];
+        Camera.main.GetComponent<AudioSource>().Play();
+        Camera.main.GetComponent<AudioSource>().loop = true;
+
+        int count = _mapRespawnPoint.childCount;
+
+        for (int i = 0; i < count; i++)
+        {
+            var child = _mapRespawnPoint.GetChild(i);
+            Destroy(child.gameObject);
+        }
+        _startScreen.SetActive(false);
+        _UIScreen.SetActive(true);
+        _finalScreen.SetActive(false);
+        _restartScreen.SetActive(false);
+        _optionScreen.SetActive(false);
+
         score = 0;
         _scoreText.text = " " + score;
         bonus = 0;
@@ -921,6 +1007,7 @@ public class GameManager : MonoBehaviour
         Camera.main.GetComponent<AudioSource>().Play();
 
         _startScreen.SetActive(true);
+        _UIScreen.SetActive(false);
         _finalScreen.SetActive(false);
         _restartScreen.SetActive(false);
         _optionScreen.SetActive(false);
