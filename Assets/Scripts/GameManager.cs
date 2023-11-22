@@ -99,6 +99,9 @@ public class GameManager : MonoBehaviour
     Button _restartButton;
 
     [SerializeField]
+    Toggle _unlockMapsButton;
+
+    [SerializeField]
     Button _finalButton;
 
     [SerializeField]
@@ -121,6 +124,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     GameObject _optionScreen;
+
+    [SerializeField]
+    AddScreenMenuController _addMenuScreen;
 
     [SerializeField]
     GameObject _grid;
@@ -150,7 +156,7 @@ public class GameManager : MonoBehaviour
     List<GameObject> _mapsPrefabs = new List<GameObject>();
 
     [SerializeField] private UIMapSelection _UiMapSelectionPF;
-
+ 
     [SerializeField] private Transform _UIMapSelectionRoot;
 
     [SerializeField]
@@ -185,6 +191,7 @@ public class GameManager : MonoBehaviour
 
     private Direction _lastDirection = Direction.Right;
     private List<Direction> _directions = new List<Direction>();
+    private List<UIMapSelection> _currentMaps = new List<UIMapSelection>();
     private bool _dashing;
     private void Start()
     {
@@ -193,6 +200,7 @@ public class GameManager : MonoBehaviour
         {
             var mapUI = Instantiate(_UiMapSelectionPF, _UIMapSelectionRoot);
             mapUI.SetImage(_mapsPrefabs[i].GetComponent<MapConfig>()._character);
+            _currentMaps.Add(mapUI);
         }
 
         GameObject obj = Instantiate(_gridBonus, this.transform);
@@ -221,12 +229,21 @@ public class GameManager : MonoBehaviour
         _pauseButton.onClick.AddListener(Pause);
         _finalButton.onClick.AddListener(Restart);
         _restartButton.onClick.AddListener(Restart);
+        _unlockMapsButton.onValueChanged.AddListener(UnlockMaps);
 
 
         lastMov = Time.time;
 
         InvokeRepeating("RespawnEnemy", 1, 4);
 
+    }
+
+    private void UnlockMaps(bool value)
+    {
+        for (int i = 1; i < _currentMaps.Count; i++)
+        {
+            _currentMaps[i].SetLocker(value);
+        }
     }
 
     private void Pause()
@@ -316,6 +333,13 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
+
+        if (_currentMaps[totalMaps].MapLocked)
+        {
+            _addMenuScreen.gameObject.SetActive(true);
+            _addMenuScreen.Initialize(_currentMaps[totalMaps].ImageMap);
+            return;
+        }
 
         foreach (var item in _enemylist)
         {
@@ -1021,5 +1045,13 @@ public class GameManager : MonoBehaviour
         move = true;
         _player.SetActive(true);
         _optionScreen.SetActive(false);
+    }
+
+    public void MainMenuAddReward()
+    {
+        _currentMaps[totalMaps].SetLocker(false);
+
+        //change that after
+        StartGame();
     }
 }
