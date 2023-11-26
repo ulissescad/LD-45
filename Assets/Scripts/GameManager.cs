@@ -228,7 +228,7 @@ public class GameManager : MonoBehaviour
         _startButton.onClick.AddListener(StartGame);
         _pauseButton.onClick.AddListener(Pause);
         _finalButton.onClick.AddListener(Restart);
-        _restartButton.onClick.AddListener(Restart);
+        _restartButton.onClick.AddListener(Replay);
         _unlockMapsButton.onValueChanged.AddListener(UnlockMaps);
 
 
@@ -313,6 +313,55 @@ public class GameManager : MonoBehaviour
         _optionScreen.SetActive(false);
 
         totalMaps = 0;
+        score = 0;
+        _scoreText.text = " " + score;
+        bonus = 0;
+
+        GameObject obj = Instantiate(_mapsPrefabs[totalMaps], _mapRespawnPoint);
+        _grid = obj.GetComponent<MapConfig>()._grid;
+        _gridColisor = obj.GetComponent<MapConfig>()._gridOBS;
+        _gridFloor = obj.GetComponent<MapConfig>()._gridFloor;
+        _bgImage.sprite = obj.GetComponent<MapConfig>()._character.sprite;
+        _charColor = obj.GetComponent<MapConfig>()._charColor;
+        _OBSColor = obj.GetComponent<MapConfig>()._OBSColor;
+
+        isFinished = false;
+        _totalGrey = 1;
+
+        Invoke("MountRefGrid", 1);
+    }
+
+    private void Replay()
+    {
+
+        foreach (var item in _enemylist)
+        {
+            GameObject en = item;
+            Destroy(en);
+        }
+
+        _enemylist.Clear();
+        _maxEnemies = 10;
+
+        int audio = Random.RandomRange(0, 3);
+
+        Camera.main.GetComponent<AudioSource>().clip = _inGame[audio];
+        Camera.main.GetComponent<AudioSource>().Play();
+        Camera.main.GetComponent<AudioSource>().loop = true;
+
+        int count = _mapRespawnPoint.childCount;
+
+        for (int i = 0; i < count; i++)
+        {
+            var child = _mapRespawnPoint.GetChild(i);
+            Destroy(child.gameObject);
+        }
+        _startScreen.SetActive(false);
+        _UIScreen.SetActive(true);
+        _finalScreen.SetActive(false);
+        _restartScreen.SetActive(false);
+        _optionScreen.SetActive(false);
+
         score = 0;
         _scoreText.text = " " + score;
         bonus = 0;
